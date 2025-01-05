@@ -30,11 +30,11 @@ from launch.conditions import IfCondition
 def generate_launch_description():
     ld = LaunchDescription()
 
-    TURTLEBOT3_MODEL = "burger"
+    TURTLEBOT3_MODEL = "waffle"
 
-    enable_drive = LaunchConfiguration("enable_drive", default="true")
+    enable_drive = LaunchConfiguration("enable_drive", default="false")
     declare_enable_drive = DeclareLaunchArgument(
-        name="enable_drive", default_value="true", description="Enable robot drive node"
+        name="enable_drive", default_value="false", description="Enable robot drive node"
     )
 
 
@@ -69,8 +69,8 @@ def generate_launch_description():
     ld.add_action(gzserver_cmd)
     ld.add_action(gzclient_cmd)
 
-    ROWS = 5
-    COLS = 5
+    ROWS = 2
+    COLS = 4
 
     x = -ROWS
     y = -COLS
@@ -81,7 +81,7 @@ def generate_launch_description():
 
     # Spawn turtlebot3 instances in gazebo
     for i in range(COLS):
-        x = -ROWS
+        x = -8.0 #-ROWS
         for j in range(ROWS):
             # Construct a unique name and namespace
             name = "turtlebot" + str(i) + "_" + str(j)
@@ -116,15 +116,15 @@ def generate_launch_description():
                     str(y),
                     "-z",
                     "0.01",
-                    "-Y",
-                    "3.14159",
+                    "-Y",#orientation initiale
+                    "0.0",#valeur orientation initiale pi=180°
                     "-unpause",
                 ],
                 output="screen",
             )
 
             # Advance by 2 meter in x direction for next robot instantiation
-            x += 2.0
+            x += 0.333333333
 
             if last_action is None:
                 # Call add_action directly for the first robot to facilitate chain instantiation via RegisterEventHandler
@@ -147,14 +147,14 @@ def generate_launch_description():
             last_action = spawn_turtlebot3_burger
 
         # Advance by 2 meter in y direction for next robot instantiation
-        y += 2.0
+        y += 0.333333333333
 
     # Start all driving nodes after the last robot is spawned
     for i in range(COLS):
         for j in range(ROWS):
             namespace = "/tb" + str(i) + "_" + str(j)
             # Create spawn call
-            drive_turtlebot3_burger = Node(
+            drive_turtlebot3_waffle = Node(
                 package="turtlebot3_gazebo",
                 executable="turtlebot3_drive",
                 namespace=namespace,
@@ -167,7 +167,7 @@ def generate_launch_description():
             drive_turtlebot3_event = RegisterEventHandler(
                 event_handler=OnProcessExit(
                     target_action=last_action,
-                    on_exit=[drive_turtlebot3_burger],
+                    on_exit=[drive_turtlebot3_waffle],
                 )
             )
             
